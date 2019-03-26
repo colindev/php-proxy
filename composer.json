@@ -1,0 +1,12 @@
+{
+    "name": "colindev/proxy",
+    "description": "simple http get proxy",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7"
+    },
+    "autoload": {
+        "files": ["bin/proxy.phar"]
+    }
+}
