@@ -1,0 +1,14 @@
+{
+    "name": "test",
+    "description": "example",
+    "minimum-stability": "stable",
+    "require": {
+        "colindev/proxy": "v1.*"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/colindev/php-proxy.git"
+        }
+    ]
+}
