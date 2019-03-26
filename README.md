@@ -1,6 +1,6 @@
 # php http proxy
 
-### Quick Start
+## Quick Start
 
 #### step 1
 create composer.json
@@ -18,7 +18,7 @@ create composer.json
 }
 ```
 
-### step 2
+#### step 2
 
 ```bash
 $ composer install
