@@ -2,21 +2,49 @@
 
 class Proxy {
 
-    private $processes = [];
+    const init = 1;
+    const prefix = 2;
+
+    private $beforeProcess = array();
+    private $afterProcess = array();
 
     public function __construct($url) {
         $url = parseURL($url);
-        $this->processes[] = function(Request $req) use($url) {
+        $this->beforeProcess[self::init] = function(Request $req) use($url) {
             $req->URL->scheme = $url->scheme;
             $req->URL->host = $url->host;
         };
     }
 
-    public function stripPrefix($prefix) {
-        $this->processes[] = function(Request $req) use($prefix) {
+    public function prefix($prefix) {
 
-            $prefix = preg_replace('/\/*$/', '', $prefix);
-            $prefix = preg_replace('/\//', '\/', $prefix);
+        $this->afterProcess[self::prefix] = function(Response $res) use($prefix) {
+
+            switch (preg_replace('/;.*$/', '', $res->header('content-type'))) {
+            case 'text/html':
+            $res->body = preg_replace_callback('/(src|href)\s*=\s*([\'"])([^\'"]*)/', function($m) use($prefix) {
+                $mm = null;
+                preg_match('/^(https?:\/\/|#)/', $m[3], $mm);
+                if ($mm) {
+                    return $m[0];
+                }
+                if (strpos($m[3], '/') !== 0) {
+                    return $m[0];
+                }
+                $newLine = $m[1].'='.$m[2].$prefix.'/'.ltrim($m[3], '/');
+                return $newLine;
+            }, $res->body);
+                break;
+
+            default:
+            // do nothing
+                break;
+            }
+            
+        };
+        $prefix = preg_replace('/\/*$/', '', $prefix);
+        $prefix = preg_replace('/\//', '\/', $prefix);
+        $this->beforeProcess[self::prefix] = function(Request $req) use($prefix) {
             $req->URL->path = preg_replace('/^'.$prefix.'/', '', $req->URL->path);
         };
     }
@@ -31,8 +59,12 @@ class Proxy {
                 throw new \Exception('only support GET');
         }
 
+        foreach ($headers as $k => $v) {
+            $headers[canonicalHeaderKey($k)] = $v;
+        }
         $currentHeaders = getallheaders();
         foreach ($currentHeaders as $k => $v) {
+            $k = canonicalHeaderKey($k);
             if (array_key_exists($k, $headers)) {
                 continue;
             }
@@ -42,11 +74,12 @@ class Proxy {
         $req = new Request("http://${s['HTTP_HOST']}${s['REQUEST_URI']}", '');
         $req->headers = $headers;
 
-        foreach ($this->processes as $i => $fn) {
+        foreach ($this->beforeProcess as $fn) {
             $fn($req);
         }
 
-        $res = new Response;
+        $res = new Response($req);
+
         $c = curl_init();
         curl_setopt($c, CURLOPT_URL, $req->URL);
         curl_setopt($c, CURLOPT_HTTPHEADER, $req->headers);
@@ -68,11 +101,17 @@ class Proxy {
         });
 
         $res->body = curl_exec($c);
+        $code = curl_getinfo($c, CURLINFO_HTTP_CODE);
         $err = curl_error($c);
         curl_close($c);
 
         if ($err) {
             throw new \Exception($err);
+        }
+
+        $res->code = $code;
+        foreach ($this->afterProcess as $fn) {
+            $fn($res);
         }
 
         return $res;

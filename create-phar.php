@@ -4,10 +4,12 @@ $phar = './bin/proxy.phar';
 
 if (file_exists($phar)) {
     unlink($phar);
+    echo "unlink ${phar}", PHP_EOL;
 }
 
 if (file_exists($phar.'.gz')) {
     unlink($phar.'.gz');
+    echo "unlink ${phar}.gz", PHP_EOL;
 }
 
 try {

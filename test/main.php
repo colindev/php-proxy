@@ -1,9 +1,9 @@
 <?php
 
-include __DIR__.'/vendor/autoload.php';
-//include __DIR__.'/../bin/proxy.phar.gz';
+include __DIR__.'/../bin/proxy.phar.gz';
 
 $proxy = new proxy\Proxy('http://xxx');
+$proxy->prefix('/abc');
 $res = $proxy->exec($_SERVER);
 
 foreach ($res->headers as $k => $vs) {
@@ -11,4 +11,5 @@ foreach ($res->headers as $k => $vs) {
         header("${k}: ${v}");
     }
 }
+http_response_code($res->code);
 echo $res->body;

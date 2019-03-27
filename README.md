@@ -33,7 +33,7 @@ create example.php
 include __DIR__.'/vendor/autoload.php';
 
 $proxy = new proxy\Proxy('http://host.of.target[:port]');
-// $proxy->stripPrefix('/prefix');
+// $proxy->prefix('/prefix');
 $res = $proxy->exec($_SERVER);
 
 foreach ($res->headers as $k => $vs) {
