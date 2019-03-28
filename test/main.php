@@ -2,7 +2,11 @@
 
 include __DIR__.'/../bin/proxy.phar.gz';
 
-$proxy = new proxy\Proxy('http://xxx');
+if (!array_key_exists('PROXY', $_ENV)) {
+    die('please specify proxy target via env "PROXY"');
+}
+
+$proxy = new proxy\Proxy($_ENV['PROXY']);
 $proxy->prefix('/abc');
 $res = $proxy->exec($_SERVER);
 
