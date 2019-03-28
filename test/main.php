@@ -7,6 +7,8 @@ if (!array_key_exists('PROXY', $_ENV)) {
 }
 
 $proxy = new proxy\Proxy($_ENV['PROXY']);
+$proxy->log = new proxy\Log('php://stdout');
+$proxy->log->level(proxy\Log::INFO);
 $proxy->prefix('/abc');
 $res = $proxy->exec($_SERVER);
 

@@ -7,6 +7,8 @@ class Proxy {
 
     private $beforeProcess = array();
     private $afterProcess = array();
+    public $connTimeoutMS = 1000;
+    public $log;
 
     public function __construct($url) {
         $url = parseURL($url);
@@ -52,7 +54,11 @@ class Proxy {
     // $s: $_SERVER
     public function exec($s, $headers = array()) {
 
-        switch ($s['REQUEST_METHOD']) {
+        $method = $s['REQUEST_METHOD'];
+        $host = $s['HTTP_HOST'];
+        $uri = $s['REQUEST_URI'];
+
+        switch ($method) {
             case 'GET':
                 break;
             default:
@@ -71,7 +77,7 @@ class Proxy {
             $headers[$k] = $v;
         }
 
-        $req = new Request("http://${s['HTTP_HOST']}${s['REQUEST_URI']}", '');
+        $req = new Request("http://${host}${uri}", '');
         $req->headers = $headers;
 
         foreach ($this->beforeProcess as $fn) {
@@ -84,10 +90,12 @@ class Proxy {
         curl_setopt($c, CURLOPT_URL, $req->URL);
         curl_setopt($c, CURLOPT_HTTPHEADER, $req->headers);
         curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($c, CURLOPT_CONNECTTIMEOUT_MS, 200);
+        curl_setopt($c, CURLOPT_CONNECTTIMEOUT_MS, $this->connTimeoutMS);
         curl_setopt($c, CURLOPT_HEADERFUNCTION, function($curl, $header) use($res) {
 
             $len = strlen($header);
+            if (!$len) return $len;
+            if ($this->log) $this->log->write(Log::INFO, $res->req->URL->path.'| '.$header);
             $h = explode(':', $header, 2);
             if (count($h) == 2) {
                 $k = trim($h[0]);
