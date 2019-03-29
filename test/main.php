@@ -6,10 +6,22 @@ if (!array_key_exists('PROXY', $_ENV)) {
     die('please specify proxy target via env "PROXY"');
 }
 
-$proxy = new proxy\Proxy($_ENV['PROXY']);
+$target = $_ENV['PROXY'];
+$prefix = $_ENV['PROXY_PREFIX'];
+$vvv = proxy\Log::ERROR;
+switch (strtolower($_ENV['PROXY_LOG_VERBOSE'])){
+    case 'info':
+        $vvv = proxy\Log::INFO;
+        break;
+    case 'warnning':
+        $vvv = proxy\Log::WARN;
+        break;
+}
+
+$proxy = new proxy\Proxy($target);
 $proxy->log = new proxy\Log('php://stdout');
-$proxy->log->level(proxy\Log::INFO);
-$proxy->prefix('/abc');
+$proxy->log->verbose($vvv);
+if (!!$prefix) $proxy->prefix($prefix);
 $res = $proxy->exec($_SERVER);
 
 foreach ($res->headers as $k => $vs) {

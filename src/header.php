@@ -2,7 +2,7 @@
 
 {
 
-function canonicalHeaderKey($k) {
+function canonicalHeaderKey($k) :string {
 
     $ws = explode('-', $k);
     foreach ($ws as $i => $w) {

@@ -15,6 +15,7 @@ class Proxy {
         $this->beforeProcess[self::init] = function(Request $req) use($url) {
             $req->URL->scheme = $url->scheme;
             $req->URL->host = $url->host;
+            $req->headers['Host'] = $url->host;
         };
     }
 
@@ -52,7 +53,7 @@ class Proxy {
     }
 
     // $s: $_SERVER
-    public function exec($s, $headers = array()) {
+    public function exec($s, $headers = array()) :Response {
 
         $method = $s['REQUEST_METHOD'];
         $host = $s['HTTP_HOST'];
@@ -77,12 +78,15 @@ class Proxy {
             $headers[$k] = $v;
         }
 
-        $req = new Request("http://${host}${uri}", '');
+        $req = new Request($method, "//${host}${uri}", '');
         $req->headers = $headers;
 
         foreach ($this->beforeProcess as $fn) {
             $fn($req);
         }
+
+        if ($this->log) $this->log->write(Log::INFO, "{$host}{$uri} proxy to {$req->URL}".PHP_EOL);
+        if ($this->log) $this->log->write(Log::INFO, $req.PHP_EOL);
 
         $res = new Response($req);
 

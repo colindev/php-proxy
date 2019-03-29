@@ -17,13 +17,13 @@ class URL {
 
 function parseURL($url) :URL {
 
-    preg_match('/^(https?):\/\/([^\/?]+)(\/[^?]*)?(\?.*)?$/', $url, $m);
+    preg_match('/^([a-z]*:){0,1}\/\/([^\/?]+)(\/[^?]*)?(\?.*)?$/', $url, $m);
     if (!$m) {
         throw new \Exception('error url'); 
     }
 
     $ret = new URL;
-    $ret->scheme = $m[1];
+    $ret->scheme = rtrim($m[1], ':');
     $ret->host = $m[2];
     $ret->path = $m[3];
     $ret->queryString = preg_replace('/^\?/', '', $m[4]);

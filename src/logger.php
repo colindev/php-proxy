@@ -6,11 +6,11 @@ interface Logger {
 
 class Log implements Logger {
 
-    const INFO = 0;
+    const ERROR = 0;
     const WARN = 1;
-    const ERROR = 2;
+    const INFO = 2;
 
-    private $level = self::ERROR;
+    private $verbose = self::ERROR;
     private $output;
 
     public function __construct($output) {
@@ -20,12 +20,12 @@ class Log implements Logger {
         fclose($this->output);
     }
 
-    public function level(int $lv) {
-        $this->level = $lv;
+    public function verbose(int $vvv) {
+        $this->verbose = $vvv;
     }
 
-    public function write(int $lv, string $msg) {
-        if ($lv < $this->level) return;
+    public function write(int $vvv, string $msg) {
+        if ($vvv > $this->verbose) return;
         fwrite($this->output, $msg);
     }
     
