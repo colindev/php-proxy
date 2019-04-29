@@ -10,8 +10,7 @@ class URL {
         return $this->scheme.
             '://'.
             $this->host.
-            $this->path.'?'.
-            $this->queryString;
+            $this->path.($this->queryString?'?'.$this->queryString:'');
     }
 }
 
@@ -26,6 +25,8 @@ function parseURL($url) :URL {
     $ret->scheme = rtrim($m[1], ':');
     $ret->host = $m[2];
     $ret->path = $m[3];
-    $ret->queryString = preg_replace('/^\?/', '', $m[4]);
+    if (array_key_exists(4, $m)) {
+        $ret->queryString = preg_replace('/^\?/', '', $m[4]);
+    }
     return $ret;
 }

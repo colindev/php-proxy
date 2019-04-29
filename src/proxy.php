@@ -11,6 +11,7 @@ class Proxy {
     public $log;
 
     public function __construct($url) {
+
         $url = parseURL($url);
         $this->beforeProcess[self::init] = function(Request $req) use($url) {
             $req->URL->scheme = $url->scheme;
@@ -54,6 +55,8 @@ class Proxy {
 
     // $s: $_SERVER
     public function exec($s, $headers = array()) :Response {
+
+        if ($this->log) $this->log->write(Log::INFO, json_encode($s));
 
         $method = $s['REQUEST_METHOD'];
         $host = $s['HTTP_HOST'];
