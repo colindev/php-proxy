@@ -6,10 +6,11 @@ if (!array_key_exists('PROXY', $_ENV)) {
     die('please specify proxy target via env "PROXY"');
 }
 
-$target = $_ENV['PROXY'];
-$prefix = $_ENV['PROXY_PREFIX'];
+$target = array_key_exists('PROXY', $_ENV)? $_ENV['PROXY'] : die('please specify proxy target via env "PROXY"');
+$prefix = array_key_exists('PROXY_PREFIX', $_ENV)? $_ENV['PROXY_PREFIX'] : '';
+$verbose = array_key_exists('PROXY_LOG_VERBOSE', $_ENV)? $_ENV['PROXY_LOG_VERBOSE'] : '';
 $vvv = proxy\Log::ERROR;
-switch (strtolower($_ENV['PROXY_LOG_VERBOSE'])){
+switch (strtolower($verbose)){
     case 'info':
         $vvv = proxy\Log::INFO;
         break;
