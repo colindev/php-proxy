@@ -129,6 +129,8 @@ class Proxy {
             $fn($res);
         }
 
+        $res->headers['Content-Length'] = [strlen($res->body)];
+
         return $res;
     }
 }
